@@ -106,4 +106,4 @@ Model Context Protocol (MCP) enables standardized tool interaction between agent
 ## Notes
 - Please note that the FHIR data used in this repository is **NOT** real patient data
 - To use the CLI chat with Claude, please use your own API Key. Create a `.env` file in the project root containing `ANTHROPIC_API_KEY={insert_your_api_key_here}`
-- The project uses `python-dotenv` to load environment variables automatically.
+- The project uses `python-dotenv` to load the API key securely at runtime
