@@ -1,46 +1,3 @@
-"""
-Lotus Conditions Data Store + FastMCP Tools
-============================================
-Live, deduplicated representation of FHIR Condition resources with two MCP tools:
-  • query_conditions  – RAG-style retrieval (returns immediately, even mid-ingestion)
-  • correct_condition – user correction to retract a concept
-  • store_status      – monitoring / ingestion progress
-
-Usage
------
-    # Run the two-day ingestion simulation:
-    python conditions_store.py conditions.json
-
-    # Or import and use directly:
-    from conditions_store import STORE, tool_query_conditions, tool_correct_condition
-    STORE.ingest_batch(records, "day1")
-    tool_query_conditions(text="tuberculosis")
-    tool_correct_condition(concept="tuberculosis")
-
-Architecture
-------------
-ConditionStore
-  ├── _by_id:           dict[condition_id → ConditionRecord]     O(1) lookup
-  ├── _snomed_to_group: dict[snomed_code → group_key]            inverted index
-  └── _groups:          dict[group_key → ConceptGroup]           concept-level view
-
-ConceptGroup
-  - Aggregates all ConditionRecords sharing at least one SNOMED code.
-  - "Canonical" record = the one with the most source identifiers
-    (reconciled records in this dataset accumulate identifiers across systems).
-  - `retracted` flag: set by user correction; excluded from queries by default.
-
-Data quality handling
----------------------
-Issue seen in dataset          → How we handle it
-─────────────────────────────────────────────────
-Vague/overlapping time ranges  → Stored as-is; query returns both onset_start/end
-Wrong active/inactive status   → clinicalStatus respected; missing → "unknown"
-Admin/clerical entries         → is_admin=True; excluded from queries by default
-                                  (detected by ADMIN CODE or IMO0002 in coding)
-Duplicate concepts             → Merged into one ConceptGroup via SNOMED index
-"""
-
 from __future__ import annotations
 
 import json
@@ -138,19 +95,3 @@ if __name__ == "__main__":
     else:
         print(f"Unknown mode '{mode}'. Use: simulate | serve")
         sys.exit(1)
-
-
-# ---------------------------------------------------------------------------
-# ---------------------------------------------------------------------------
-# To run as an MCP server after pre-loading the dataset:
-#
-#   python -m app.main serve data/conditions.json
-#
-# To just run the simulation demo:
-#
-#   python -m app.main simulate data/conditions.json
-# 
-# To run it as a chat directly in your terminal:
-# 
-#   python -m chat.chat
-# ---------------------------------------------------------------------------
