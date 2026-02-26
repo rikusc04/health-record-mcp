@@ -62,16 +62,16 @@ Clients
 
 
 ## Running the Project
-1. To run the simulation demo:
+1. To run the simulation demo:  
     `python -m app.main simulate data/conditions.json`
     - Simulates multi-batch ingestion and querying
-2. To run as an MCP server:
+2. To run as an MCP server:  
     `python -m app.main serve data/conditions.json`
     - Starts an MCP Server exposing:
         - `query_conditions`
         - `correct_condition`
         - `store_status`
-3. To run it as a chat directly in your terminal:
+3. To run it as a chat directly in your terminal:  
     `python -m chat.chat`
     - An interactive CLI agent that uses the MCP Server tools
 
