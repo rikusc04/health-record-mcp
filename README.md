@@ -74,6 +74,23 @@ Clients
 3. To run it as a chat directly in your terminal:  
     - `python -m chat.chat`
     - An interactive CLI agent that uses the MCP Server tools
+4. To connect via Claude Desktop:
+    - Add the following to your Claude Desktop config (`claude_desktop_config.json`):
+    ```
+    {
+        "mcpServers": {
+            "your-project-name": {
+                "command": "python",
+                "args": ["-m", "app.main", "serve", "data/conditions.json"],
+                "cwd": "/absolute/path/to/your/project"
+            }
+        }
+    }
+    ```
+    - Restart Claude Desktop. Then, the the MCP tools (`query_conditions`, `correct_condition`, `store_status`) will be available directly in your Claude Desktop conversations
+    - Note:
+        - The config file is typically located at `~/Library/Application Support/Claude/claude_desktop_config.json` on macOS or `%APPDATA%\Claude\claude_desktop_config.json` on Windows
+        - Claude Desktop will manage the server process itself, so you don't need to start it manually when using this approach
 
 
 ## Project Structure
