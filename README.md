@@ -14,6 +14,7 @@ This is a MCP-compatible health record retrieval system built on FHIR Conditions
 
 
 ## Architecture
+```
 ConditionStore (Domain Layer)
 ├── Record ingestion
 ├── Concept grouping + deduplication
@@ -31,6 +32,7 @@ Interfaces
 Clients
 ├── MCP-compatible agents
 └── Local CLI chat interface
+```
 
 
 ## Concept Model
