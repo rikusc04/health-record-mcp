@@ -77,13 +77,14 @@ Clients
 
 
 ## Project Structure
+```
 app/            # Entry point / runtime modes  
 conditions/     # Domain models + store logic  
 interfaces/     # MCP server integration  
 tools/          # Tool implementations  
 chat/           # Agent CLI interface  
 data/           # Example dataset  
-
+```
 
 ## Design Goals
 - Treat clinical data as structured domain entities rather than raw text
