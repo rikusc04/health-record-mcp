@@ -76,7 +76,7 @@ if __name__ == "__main__":
         if data_file:
             import math, pathlib as _pl
 
-            print(f"Pre-loading {data_file}...", flush=True)
+            print(f"Pre-loading {data_file}...", file=sys.stderr, flush=True)
 
             data = json.loads(_pl.Path(data_file).read_text())
 
@@ -93,5 +93,5 @@ if __name__ == "__main__":
         mcp.run()
 
     else:
-        print(f"Unknown mode '{mode}'. Use: simulate | serve")
+        print(f"Unknown mode '{mode}'. Use: simulate | serve", file=sys.stderr, flush=True)
         sys.exit(1)
