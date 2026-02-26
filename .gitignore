@@ -1,0 +1,21 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# MacOS junk
+.DS_Store
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment variables (DO NOT COMMIT)
+.env
+
+# Python build artifacts (future-proofing)
+build/
+dist/
+*.egg-info/
+.eggs/
