@@ -7,7 +7,9 @@ from typing import Optional
 
 @dataclass
 class ConditionRecord:
-    """Normalised, flattened view of a FHIR Condition resource."""
+    """
+    Normalised, flattened view of a FHIR Condition resource
+    """
     id: str
     display_text: str
     clinical_status: str             # "Active" | "Resolved" | "unknown"
@@ -25,11 +27,7 @@ class ConditionRecord:
 class ConceptGroup:
     """
     All ConditionRecords that share at least one SNOMED code.
-
-    Canonical record: the one with the most source_identifiers.
-    In this dataset, reconciled/merged records accumulate identifiers
-    across EMR systems, making identifier count a reliable proxy for
-    "most authoritative."
+    Canonical record: the one with the most source_identifiers. In this dataset, reconciled/merged records accumulate identifiers across EMR systems, making identifier count a reliable proxy for "most authoritative."
     """
     snomed_codes: set[str]
     records: list[ConditionRecord] = field(default_factory=list)
