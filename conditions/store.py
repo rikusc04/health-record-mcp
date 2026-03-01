@@ -13,16 +13,12 @@ from conditions.constants import ( SNOMED_SYSTEM, ICD10_SYSTEM, ADMIN_CODES, )
 class ConditionStore:
     """
     Thread-safe, live store for FHIR Condition resources.
-
     Key design choices for latency:
-    ─────────────────────────────────
-    • All lookups are O(1) or O(groups) — no sequential scans over raw records.
-    • `query()` never blocks on ingestion; callers get a `partial` flag instead.
-    • `retract_concept()` is a simple flag flip — O(groups).
-    • `ingest_batch()` runs under a single RLock, but batches are processed
-      synchronously so callers can pipeline: ingest day1 → query → ingest day2.
-    • For async use, call `ingest_batch()` in a background thread; queries
-      will return partial=True with whatever has been ingested so far.
+    - All lookups are O(1) or O(groups) — no sequential scans over raw records
+    - `query()` never blocks on ingestion; callers get a `partial` flag instead
+    - `retract_concept()` is a simple flag flip — O(groups)
+    - `ingest_batch()` runs under a single RLock, but batches are processed synchronously so callers can pipeline: ingest day1 → query → ingest day2
+    - For async use, call `ingest_batch()` in a background thread; queries will return partial=True with whatever has been ingested so far
     """
 
     def __init__(self):
@@ -44,11 +40,8 @@ class ConditionStore:
 
     def ingest_batch(self, records: list[dict], batch_label: str = "batch"):
         """
-        Ingest a list of raw FHIR Condition dicts.
-
-        Thread-safe; can be called from a background thread while the main
-        thread is already issuing queries. The `partial` flag in query results
-        will be True until `mark_ingestion_complete()` is called.
+        Ingest a list of raw FHIR Condition dicts
+        Thread-safe: can be called from a background thread while the main thread is already issuing queries. The `partial` flag in query results will be True until `mark_ingestion_complete()` is called
         """
         t0 = time.monotonic()
         added, skipped, errors = 0, 0, []
@@ -86,7 +79,9 @@ class ConditionStore:
 
     @staticmethod
     def _parse(raw: dict) -> ConditionRecord:
-        """Extract structured fields from a raw FHIR Condition dict."""
+        """
+        Extract structured fields from a raw FHIR Condition dict
+        """
         def extract_codes(raw_code: dict) -> tuple[list[str], list[str], bool]:
             snomed, icd10, is_admin = [], [], False
             for c in raw_code.get("coding", []):
@@ -100,23 +95,23 @@ class ConditionStore:
                     icd10.append(code)
             return list(dict.fromkeys(snomed)), list(dict.fromkeys(icd10)), is_admin
 
-        code_block   = raw.get("code", {})
-        display      = code_block.get("text", "")
+        code_block = raw.get("code", {})
+        display = code_block.get("text", "")
         if not display and code_block.get("coding"):
             display = code_block["coding"][0].get("display", "")
 
         snomed_codes, icd10_codes, is_admin = extract_codes(code_block)
 
-        status_block   = raw.get("clinicalStatus", {})
+        status_block = raw.get("clinicalStatus", {})
         status_codings = status_block.get("coding", [])
         if status_codings:
             status = status_codings[0].get("display", "unknown")
         else:
             status = status_block.get("text", "unknown")
 
-        onset      = raw.get("onsetPeriod", {})
+        onset = raw.get("onsetPeriod", {})
         identifiers = [i["value"] for i in raw.get("identifier", []) if "value" in i]
-        recorder    = raw.get("recorder", {}).get("reference")
+        recorder = raw.get("recorder", {}).get("reference")
 
         return ConditionRecord(
             id=raw["id"],
@@ -133,7 +128,9 @@ class ConditionStore:
         )
 
     def _upsert(self, rec: ConditionRecord):
-        """Insert or update a record, maintaining the SNOMED group index."""
+        """
+        Insert or update a record, maintaining the SNOMED group index
+        """
         with self._lock:
             self._by_id[rec.id] = rec
 
@@ -210,14 +207,13 @@ class ConditionStore:
 
     def retract_concept(self, concept_hint: str) -> dict:
         """
-        Retract all groups matching the concept hint.
-
+        Retract all groups matching the concept hint
         Matches against:
-          • Group display text (case-insensitive substring)
-          • SNOMED codes (substring match, so "11999007" works)
-          • ICD-10 codes of any record in the group
+          - Group display text (case-insensitive substring)
+          - SNOMED codes (substring match, so "11999007" works)
+          - ICD-10 codes of any record in the group
 
-        Returns a summary dict with retracted_groups and retracted_record_ids.
+        Returns a summary dict with retracted_groups and retracted_record_ids
         """
         hint_lower = concept_hint.lower()
         retracted_groups = []
@@ -228,8 +224,8 @@ class ConditionStore:
                 if grp.retracted:
                     continue
                 display_match = hint_lower in grp.display.lower()
-                code_match    = any(hint_lower in sc for sc in grp.snomed_codes)
-                icd_match     = any(
+                code_match = any(hint_lower in sc for sc in grp.snomed_codes)
+                icd_match = any(
                     hint_lower in icd
                     for r in grp.records
                     for icd in r.icd10_codes
@@ -258,10 +254,8 @@ class ConditionStore:
         limit: int = 50,
     ) -> dict:
         """
-        Instant search over concept groups.
-
-        Returns immediately regardless of ingestion state.
-        `partial=True` means ingestion is not yet complete.
+        Instant search over concept groups
+        Returns immediately regardless of ingestion state `partial=True` means ingestion is not yet complete
         """
         results = []
         with self._lock:
@@ -309,7 +303,9 @@ class ConditionStore:
         }
 
     def status(self) -> dict:
-        """Monitoring: full ingestion report and data quality summary."""
+        """
+        Monitoring: full ingestion report and data quality summary
+        """
         with self._lock:
             return {
                 "ingestion_complete": self._ingestion_complete,
