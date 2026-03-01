@@ -28,8 +28,14 @@ tools = [
         "input_schema": {
             "type": "object",
             "properties": {
-                "text": {"type": "string", "description": "condition to search for"},
-                "active_only": {"type": "boolean", "description": "only active conditions"},
+                "text": {
+                        "type": "string", 
+                        "description": "condition to search for"
+                        },
+                "active_only": {
+                                "type": "boolean", 
+                                "description": "only active conditions"
+                                },
             }
         }
     },
@@ -39,7 +45,9 @@ tools = [
         "input_schema": {
             "type": "object",
             "properties": {
-                "concept": {"type": "string", "description": "condition to retract"},
+                "concept": {"type": "string", 
+                            "description": "condition to retract"
+                           },
             },
             "required": ["concept"]
         }
@@ -55,7 +63,7 @@ def run_tool(name, inputs):
 
 # Chat loop
 messages = []
-print("Chat with Claude about your conditions. Type 'quit' to exit.\n")
+print("Chat with Claude about your conditions. Or, type 'quit' to exit.")
 
 while True:
     user_input = input("You: ")
